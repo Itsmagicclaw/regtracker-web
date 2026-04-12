@@ -10,10 +10,7 @@ Route::get('/panel/login',  [AdminPanelController::class, 'login']);
 Route::post('/panel/login', [AdminPanelController::class, 'login']);
 Route::get('/panel/logout', [AdminPanelController::class, 'logout']);
 
-Route::middleware(function ($request, $next) {
-    if (!session('panel_auth')) return redirect('/panel/login');
-    return $next($request);
-})->prefix('panel')->group(function () {
+Route::middleware('panel.auth')->prefix('panel')->group(function () {
     Route::get('/',                         [AdminPanelController::class, 'dashboard']);
     Route::get('/changes',                  [AdminPanelController::class, 'changes']);
     Route::post('/changes/{id}/approve',    [AdminPanelController::class, 'approveChange']);
