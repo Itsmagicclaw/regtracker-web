@@ -29,7 +29,7 @@ return new class extends Migration
             $table->index('primary_name');
             $table->index('entry_type');
             $table->index('is_active');
-            $table->fullText(['primary_name', 'aliases']);
+            $table->fullText('primary_name');
         });
     }
 
