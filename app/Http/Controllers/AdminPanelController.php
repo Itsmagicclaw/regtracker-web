@@ -139,6 +139,7 @@ HTML;
             $error = '<div class="flash flash-error">Incorrect admin secret. Try again.</div>';
         }
 
+        $csrfToken = csrf_token();
         return response(<<<HTML
 <!DOCTYPE html>
 <html lang="en">
@@ -165,7 +166,7 @@ button:hover{background:#2563eb}
   <div class="subtitle">Admin Panel — Enter your admin secret to continue</div>
   {$error}
   <form method="POST" action="/panel/login">
-    <input type="hidden" name="_token" value="{$request->session()->token()}">
+    <input type="hidden" name="_token" value="{$csrfToken}">
     <label>Admin Secret</label>
     <input type="password" name="secret" placeholder="Enter admin secret" autofocus required>
     <button type="submit">Sign In →</button>
