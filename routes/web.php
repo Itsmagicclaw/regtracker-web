@@ -3,7 +3,21 @@
 use App\Models\RegulatorySource;
 use App\Models\DetectedChange;
 use App\Http\Controllers\AdminPanelController;
+use App\Http\Controllers\CustomerPortalController;
 use Illuminate\Support\Facades\Route;
+
+// ── Customer / MTO Portal ─────────────────────────────────────────────────────
+Route::get('/portal/login',  [CustomerPortalController::class, 'login']);
+Route::post('/portal/login', [CustomerPortalController::class, 'login']);
+Route::get('/portal/logout', [CustomerPortalController::class, 'logout']);
+
+Route::middleware('portal.auth')->prefix('portal')->group(function () {
+    Route::get('/',                         [CustomerPortalController::class, 'dashboard']);
+    Route::get('/alerts',                   [CustomerPortalController::class, 'alerts']);
+    Route::get('/alerts/{id}',              [CustomerPortalController::class, 'showAlert']);
+    Route::post('/actions/{id}/update',     [CustomerPortalController::class, 'updateAction']);
+});
+
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
 Route::get('/panel/login',  [AdminPanelController::class, 'login']);

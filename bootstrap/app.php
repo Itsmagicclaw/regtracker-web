@@ -13,8 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'admin'      => \App\Http\Middleware\AdminMiddleware::class,
-            'panel.auth' => \App\Http\Middleware\PanelAuthMiddleware::class,
+            'admin'       => \App\Http\Middleware\AdminMiddleware::class,
+            'panel.auth'  => \App\Http\Middleware\PanelAuthMiddleware::class,
+            'portal.auth' => \App\Http\Middleware\PortalAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
