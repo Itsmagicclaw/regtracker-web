@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Route;
 // ── Public ────────────────────────────────────────────────────────────────────
 Route::post('/auth/login',  [AuthController::class, 'login']);
 Route::get('/health',       fn() => response()->json(['status' => 'ok', 'app' => 'RegTracker']));
-Route::get('/debug-secret', fn() => response()->json(['admin_secret' => config('regtracker.admin_secret', ''), 'app_key_set' => !empty(config('app.key'))]));
 
 // ── Admin routes (Bearer token = ADMIN_SECRET) ────────────────────────────────
 Route::prefix('admin')->middleware('admin')->group(function () {

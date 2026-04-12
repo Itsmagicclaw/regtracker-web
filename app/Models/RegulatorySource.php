@@ -43,6 +43,13 @@ class RegulatorySource extends Model
         return $this->hasMany(ScraperHealth::class, 'source_id');
     }
 
+    public function latestHealth(): HasMany
+    {
+        return $this->hasMany(ScraperHealth::class, 'source_id')
+            ->orderByDesc('run_at')
+            ->limit(1);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
