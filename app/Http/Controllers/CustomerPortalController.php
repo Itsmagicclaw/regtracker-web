@@ -226,6 +226,7 @@ HTML;
         }
 
         $filterJs = "function applyFilter(){const r=document.getElementById('r').value,s=document.getElementById('s').value,sv=document.getElementById('sv').value;location.href='/portal/alerts?range='+r+'&source='+s+'&severity='+sv;}";
+        $alertsTotal = $alerts->total();
 
         $body = <<<HTML
 <div class="portal-header">
@@ -236,7 +237,7 @@ HTML;
   <select id="r" onchange="applyFilter()" style="padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff">{$rangeOpts}</select>
   <select id="s" onchange="applyFilter()" style="padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff">{$sourceOpts}</select>
   <select id="sv" onchange="applyFilter()" style="padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff">{$sevOpts}</select>
-  <span style="color:#64748b;font-size:13px">{$alerts->total()} alerts</span>
+  <span style="color:#64748b;font-size:13px">{$alertsTotal} alerts</span>
 </div>
 <div class="alert-list">{$rows}</div>
 HTML;
