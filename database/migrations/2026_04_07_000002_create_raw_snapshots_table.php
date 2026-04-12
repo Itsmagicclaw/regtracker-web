@@ -10,17 +10,18 @@ return new class extends Migration
     {
         Schema::create('raw_snapshots', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('regulatory_source_id')->constrained('regulatory_sources')->cascadeOnDelete();
+            $table->foreignId('source_id')->constrained('regulatory_sources')->cascadeOnDelete();
             $table->longText('raw_content');
             $table->string('content_hash', 64); // SHA256 hash
             $table->bigInteger('file_size_bytes');
-            $table->integer('record_count'); // Number of entries parsed
-            $table->timestamp('captured_at');
+            $table->integer('record_count');
+            $table->string('status')->default('ok'); // ok, error
+            $table->timestamp('snapshot_at');
             $table->timestamps();
 
-            $table->index('regulatory_source_id');
+            $table->index('source_id');
             $table->index('content_hash');
-            $table->unique(['regulatory_source_id', 'content_hash']);
+            $table->unique(['source_id', 'content_hash']);
         });
     }
 
