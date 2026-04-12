@@ -2,7 +2,28 @@
 
 use App\Models\RegulatorySource;
 use App\Models\DetectedChange;
+use App\Http\Controllers\AdminPanelController;
 use Illuminate\Support\Facades\Route;
+
+// ── Admin Panel ───────────────────────────────────────────────────────────────
+Route::get('/panel/login',  [AdminPanelController::class, 'login']);
+Route::post('/panel/login', [AdminPanelController::class, 'login']);
+Route::get('/panel/logout', [AdminPanelController::class, 'logout']);
+
+Route::middleware(function ($request, $next) {
+    if (!session('panel_auth')) return redirect('/panel/login');
+    return $next($request);
+})->prefix('panel')->group(function () {
+    Route::get('/',                         [AdminPanelController::class, 'dashboard']);
+    Route::get('/changes',                  [AdminPanelController::class, 'changes']);
+    Route::post('/changes/{id}/approve',    [AdminPanelController::class, 'approveChange']);
+    Route::post('/changes/{id}/dismiss',    [AdminPanelController::class, 'dismissChange']);
+    Route::get('/sources',                  [AdminPanelController::class, 'sources']);
+    Route::get('/mtos',                     [AdminPanelController::class, 'mtos']);
+    Route::get('/mtos/create',              [AdminPanelController::class, 'createMto']);
+    Route::post('/mtos',                    [AdminPanelController::class, 'storeMto']);
+});
+
 
 Route::get('/', function () {
     $sources = RegulatorySource::orderBy('jurisdiction')->orderBy('name')->get();
