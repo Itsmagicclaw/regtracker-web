@@ -10,17 +10,18 @@ return new class extends Migration
     {
         Schema::create('regulatory_sources', function (Blueprint $table) {
             $table->id();
-            $table->string('source_name'); // e.g., "OFAC SDN List"
-            $table->string('source_type'); // ofac, uk_sanctions, un_sanctions, eu_sanctions, dfat, austrac, fca, fintrac, federal_register
-            $table->string('url');
-            $table->text('description')->nullable();
-            $table->integer('check_interval_hours')->default(24);
+            $table->string('name');           // e.g., "OFAC SDN List"
+            $table->string('type');           // sanctions_list, guidance, fatf
+            $table->string('jurisdiction');   // GLOBAL, UK, EU, AU, USA, CA
+            $table->string('source_url');
+            $table->integer('check_frequency_hours')->default(24);
+            $table->string('last_status')->default('pending'); // pending, ok, error
             $table->timestamp('last_checked_at')->nullable();
             $table->timestamp('last_changed_at')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->index('source_type');
+            $table->index('type');
             $table->index('is_active');
             $table->index('last_checked_at');
         });
