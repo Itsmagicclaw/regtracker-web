@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class RegulatorySource extends Model
 {
@@ -43,11 +44,10 @@ class RegulatorySource extends Model
         return $this->hasMany(ScraperHealth::class, 'source_id');
     }
 
-    public function latestHealth(): HasMany
+    public function latestHealth(): HasOne
     {
-        return $this->hasMany(ScraperHealth::class, 'source_id')
-            ->orderByDesc('run_at')
-            ->limit(1);
+        return $this->hasOne(ScraperHealth::class, 'source_id')
+            ->latestOfMany('run_at');
     }
 
     public function scopeActive($query)
