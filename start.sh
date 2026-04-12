@@ -4,7 +4,10 @@ set -e
 echo "=== RegTracker Startup ==="
 echo "PORT: ${PORT:-not set}"
 echo "APP_ENV: ${APP_ENV:-not set}"
-echo "DB_HOST: ${DB_HOST:-not set}"
+
+echo "Clearing config cache (ensures runtime env vars are used)..."
+php artisan config:clear
+php artisan cache:clear
 
 echo "Running database migrations..."
 php artisan migrate --force
