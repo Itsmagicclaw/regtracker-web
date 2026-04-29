@@ -17,6 +17,8 @@ class DashboardController extends Controller
         sort($countries);
         $results  = $this->fetcher->fetchAll($country === 'all' ? null : $country);
         $total    = array_sum(array_column($results, 'item_count'));
+        $count    = count($results);
+        $year     = date('Y');
 
         $countryOpts = '';
         foreach (array_merge(['all' => 'All Countries'], array_combine($countries, $countries)) as $val => $label) {
@@ -32,10 +34,10 @@ class DashboardController extends Controller
 
         $cards = '';
         foreach ($results as $r) {
-            $s      = $r['source'];
-            $color  = $s['color'];
-            $items  = $r['items'];
-            $count  = $r['item_count'];
+            $s         = $r['source'];
+            $color     = $s['color'];
+            $items     = $r['items'];
+            $itemCount = $r['item_count'];
 
             $itemsHtml = '';
             foreach ($items as $item) {
@@ -67,7 +69,7 @@ HTML;
       </div>
     </div>
     <div class="card-meta">
-      <span class="count-badge">{$count} updates</span>
+      <span class="count-badge">{$itemCount} updates</span>
       <a href="{$s['url']}" target="_blank" rel="noopener" class="src-link">Source ↗</a>
     </div>
   </div>
@@ -187,7 +189,7 @@ HTML;
 <div class="grid">{$cards}</div>
 
 <div class="footer">
-  RegTracker &copy; {$this->year()} · Data sourced directly from official regulatory bodies · For informational purposes only
+  RegTracker &copy; {$year} · Data sourced directly from official regulatory bodies · For informational purposes only
 </div>
 
 <script>
@@ -207,8 +209,4 @@ HTML);
         return response()->json(['ok' => true]);
     }
 
-    private function year(): string
-    {
-        return date('Y');
-    }
 }
