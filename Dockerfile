@@ -30,7 +30,7 @@ RUN mkdir -p storage/framework/cache/data \
              bootstrap/cache
 
 # Create .env file so artisan commands can run
-RUN printf "APP_NAME=RegTracker\nAPP_ENV=production\nAPP_DEBUG=false\nAPP_URL=https://regtracker-web.onrender.com\nLOG_CHANNEL=stderr\nLOG_LEVEL=error\nCACHE_DRIVER=file\nSESSION_DRIVER=file\nDB_CONNECTION=sqlite\n" > .env
+RUN printf "APP_NAME=RegTracker\nAPP_ENV=production\nAPP_DEBUG=true\nAPP_URL=https://regtracker-web.onrender.com\nLOG_CHANNEL=stderr\nLOG_LEVEL=debug\nCACHE_DRIVER=file\nSESSION_DRIVER=file\nDB_CONNECTION=sqlite\n" > .env
 
 # Generate APP_KEY into .env
 RUN php artisan key:generate --force
