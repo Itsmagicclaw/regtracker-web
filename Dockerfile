@@ -35,8 +35,8 @@ RUN printf "APP_NAME=RegTracker\nAPP_ENV=production\nAPP_DEBUG=true\nAPP_URL=htt
 # Generate APP_KEY into .env
 RUN php artisan key:generate --force
 
-# Set permissions
-RUN chmod -R 775 storage bootstrap/cache
+# Set permissions — 777 so any user Render runs as can write
+RUN chmod -R 777 storage bootstrap/cache
 
 EXPOSE 8080
 
