@@ -11,8 +11,6 @@ services:
         value: production
       - key: APP_DEBUG
         value: false
-      - key: APP_KEY
-        generateValue: true
       - key: CACHE_DRIVER
         value: file
       - key: SESSION_DRIVER
