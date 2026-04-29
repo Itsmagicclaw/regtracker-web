@@ -1,9 +1,15 @@
 FROM php:8.3-cli
 
-# Install system dependencies
+# Install system dependencies + PHP extension libraries
 RUN apt-get update && apt-get install -y \
     git zip unzip curl \
+    libcurl4-openssl-dev \
+    libxml2-dev \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Install required PHP extensions
+RUN docker-php-ext-install curl xml simplexml
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
