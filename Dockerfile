@@ -1,10 +1,10 @@
 FROM php:8.3-cli-alpine
 
 # Install system dependencies
-RUN apk add --no-cache git zip unzip curl bash
+RUN apk add --no-cache git zip unzip curl bash sqlite-dev
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_sqlite opcache
+# Install PHP extensions (pdo is built-in, sqlite-dev needed for pdo_sqlite)
+RUN docker-php-ext-install pdo_sqlite opcache
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
