@@ -23,15 +23,15 @@ RUN mkdir -p storage/framework/cache/data \
              storage/logs \
              bootstrap/cache
 
-# Generate APP_KEY and cache config at build time
+# Create .env file so artisan commands can run
+RUN printf "APP_NAME=RegTracker\nAPP_ENV=production\nAPP_DEBUG=false\nAPP_URL=https://regtracker-web.onrender.com\nLOG_CHANNEL=stderr\nLOG_LEVEL=error\nCACHE_DRIVER=file\nSESSION_DRIVER=file\nDB_CONNECTION=sqlite\n" > .env
+
+# Generate APP_KEY into .env
 RUN php artisan key:generate --force
-RUN php artisan config:clear
-RUN php artisan route:clear
-RUN php artisan view:clear
 
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
 EXPOSE 8080
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
+CMD bash -c "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"
