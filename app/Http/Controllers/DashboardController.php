@@ -12,13 +12,15 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $country  = $request->get('country', 'all');
-        $sources  = $this->fetcher->getSources();
-        $countries = array_values(array_unique(array_column($sources, 'country')));
-        sort($countries);
-        $results  = $this->fetcher->fetchAll($country === 'all' ? null : $country);
-        $total    = array_sum(array_column($results, 'item_count'));
-        $count    = count($results);
-        $year     = date('Y');
+        $sources       = $this->fetcher->getSources();
+        $allCountries  = array_values(array_unique(array_column($sources, 'country')));
+        sort($allCountries);
+        $totalCountries = count($allCountries);
+        $results       = $this->fetcher->fetchAll($country === 'all' ? null : $country);
+        $total         = array_sum(array_column($results, 'item_count'));
+        $count         = count($results);
+        $year          = date('Y');
+        $countries     = $allCountries;
 
         $countryOpts = '';
         foreach (array_merge(['all' => 'All Countries'], array_combine($countries, $countries)) as $val => $label) {
@@ -172,7 +174,7 @@ HTML;
   <div class="stats-row">
     <div class="stat"><div class="stat-n">{$total}</div><div class="stat-l">Updates Found</div></div>
     <div class="stat"><div class="stat-n">{$count}</div><div class="stat-l">Sources Checked</div></div>
-    <div class="stat"><div class="stat-n">12</div><div class="stat-l">Countries Covered</div></div>
+    <div class="stat"><div class="stat-n">{$totalCountries}</div><div class="stat-l">Countries Covered</div></div>
     <div class="stat"><div class="stat-n">1hr</div><div class="stat-l">Refresh Cycle</div></div>
   </div>
 </div>
