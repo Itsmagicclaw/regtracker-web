@@ -82,15 +82,6 @@ class RegulatoryFetcher
             'description' => 'Office of the Superintendent of Financial Institutions',
         ],
         [
-            'name'        => 'APRA (Australia)',
-            'country'     => 'Australia',
-            'flag'        => '🇦🇺',
-            'color'       => '#00843D',
-            'url'         => 'https://www.apra.gov.au/news-releases',
-            'type'        => 'web',
-            'description' => 'Australian Prudential Regulation Authority',
-        ],
-        [
             'name'        => 'FSB (Global)',
             'country'     => 'Global',
             'flag'        => '🌐',
@@ -100,22 +91,31 @@ class RegulatoryFetcher
             'description' => 'Financial Stability Board',
         ],
         [
-            'name'        => 'UAE Central Bank',
-            'country'     => 'UAE',
-            'flag'        => '🇦🇪',
-            'color'       => '#00732F',
-            'url'         => 'https://www.centralbank.ae/en/news-and-publications/recent-news',
-            'type'        => 'web',
-            'description' => 'Central Bank of UAE',
+            'name'        => 'BIS Speeches',
+            'country'     => 'Global',
+            'flag'        => '🏦',
+            'color'       => '#1e40af',
+            'url'         => 'https://www.bis.org/doclist/cbspeeches.rss',
+            'type'        => 'rss',
+            'description' => 'Central Bank Speeches — BIS',
         ],
         [
-            'name'        => 'SAMA (Saudi Arabia)',
-            'country'     => 'Saudi Arabia',
-            'flag'        => '🇸🇦',
-            'color'       => '#006C35',
-            'url'         => 'https://www.sama.gov.sa/en-US/News/Pages/News.aspx',
-            'type'        => 'web',
-            'description' => 'Saudi Central Bank',
+            'name'        => 'CBSL (Sri Lanka)',
+            'country'     => 'Sri Lanka',
+            'flag'        => '🇱🇰',
+            'color'       => '#8B0000',
+            'url'         => 'https://www.cbsl.gov.lk/en/news/rss',
+            'type'        => 'rss',
+            'description' => 'Central Bank of Sri Lanka',
+        ],
+        [
+            'name'        => 'BIS Research',
+            'country'     => 'Global',
+            'flag'        => '📊',
+            'color'       => '#374151',
+            'url'         => 'https://www.bis.org/doclist/rss_all_categories.rss',
+            'type'        => 'rss',
+            'description' => 'BIS Publications — All Categories',
         ],
     ];
 
@@ -191,11 +191,39 @@ class RegulatoryFetcher
         $items  = [];
         $isAtom = isset($feed->entry);
 
-        // Detect RSS 1.0/RDF: items are direct children of root, not under channel
-        $isRdf  = !$isAtom && !isset($feed->channel) && isset($feed->item);
-        $nodes  = $isAtom
-            ? $feed->entry
-            : ($isRdf ? $feed->item : ($feed->channel->item ?? []));
+        // Detect RSS 1.0/RDF — use xpath to extract items reliably
+        $isRdf = false;
+        $rdfNs = $feed->getNamespaces(true);
+        if (isset($rdfNs['rdf']) || (strpos($xml, 'rdf:RDF') !== false && !isset($feed->channel))) {
+            $isRdf = true;
+            $feed->registerXPathNamespace('rss', 'http://purl.org/rss/1.0/');
+            $feed->registerXPathNamespace('dc',  'http://purl.org/dc/elements/1.1/');
+        }
+
+        if ($isRdf) {
+            $xpathItems = $feed->xpath('//rss:item') ?: $feed->xpath('//item') ?: [];
+            foreach ($xpathItems as $node) {
+                if (count($items) >= 5) break;
+                $dc      = $node->children('http://purl.org/dc/elements/1.1/');
+                $title   = (string)($node->title ?? '');
+                $link    = (string)($node->link ?? '');
+                $desc    = strip_tags((string)($node->description ?? ''));
+                $dateStr = (string)($dc->date ?? $node->pubDate ?? '');
+                $dateTs  = $dateStr ? strtotime($dateStr) : 0;
+                $dateTs  = $dateTs ?: time();
+                $items[] = [
+                    'title'   => $this->truncate(html_entity_decode($title, ENT_QUOTES, 'UTF-8'), 120),
+                    'link'    => $link,
+                    'summary' => $this->truncate(html_entity_decode($desc, ENT_QUOTES, 'UTF-8'), 200),
+                    'date'    => $dateTs ? date('M d, Y', $dateTs) : 'Unknown date',
+                    'date_ts' => $dateTs,
+                    'badge'   => $this->detectBadge($title . ' ' . $desc),
+                ];
+            }
+            return $items ?: $this->errorItems($source, 'No items in RDF feed');
+        }
+
+        $nodes = $isAtom ? $feed->entry : ($feed->channel->item ?? []);
 
         foreach ($nodes as $node) {
             if (count($items) >= 5) break;
@@ -205,13 +233,6 @@ class RegulatoryFetcher
                 $link    = (string)($node->link['href'] ?? $node->link ?? '');
                 $desc    = strip_tags((string)($node->summary ?? $node->content ?? ''));
                 $dateStr = (string)($node->updated ?? $node->published ?? '');
-            } elseif ($isRdf) {
-                // RSS 1.0 — use dc:date namespace for date
-                $dcNs    = $node->children('http://purl.org/dc/elements/1.1/');
-                $title   = (string)($node->title ?? '');
-                $link    = (string)($node->link ?? '');
-                $desc    = strip_tags((string)($node->description ?? ''));
-                $dateStr = (string)($dcNs->date ?? $node->pubDate ?? '');
             } else {
                 $title   = (string)($node->title ?? '');
                 $link    = (string)($node->link ?? '');
