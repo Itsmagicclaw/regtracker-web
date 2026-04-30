@@ -73,31 +73,31 @@ class RegulatoryFetcher
             'description' => 'Monetary Authority of Singapore',
         ],
         [
-            'name'        => 'FINTRAC (Canada)',
+            'name'        => 'OSFI (Canada)',
             'country'     => 'Canada',
             'flag'        => '🇨🇦',
             'color'       => '#D80621',
-            'url'         => 'https://www.canada.ca/en/financial-consumer-agency/news.rss',
-            'type'        => 'rss',
-            'description' => 'Financial Intelligence — Canada',
+            'url'         => 'https://www.osfi-bsif.gc.ca/en/news',
+            'type'        => 'web',
+            'description' => 'Office of the Superintendent of Financial Institutions',
         ],
         [
-            'name'        => 'AUSTRAC (Australia)',
+            'name'        => 'APRA (Australia)',
             'country'     => 'Australia',
             'flag'        => '🇦🇺',
             'color'       => '#00843D',
-            'url'         => 'https://www.austrac.gov.au/news-media/news?format=feed&type=rss',
-            'type'        => 'rss',
-            'description' => 'Australian Transaction Reports & Analysis Centre',
+            'url'         => 'https://www.apra.gov.au/news-releases',
+            'type'        => 'web',
+            'description' => 'Australian Prudential Regulation Authority',
         ],
         [
-            'name'        => 'FATF (Global)',
+            'name'        => 'FSB (Global)',
             'country'     => 'Global',
             'flag'        => '🌐',
-            'color'       => '#4a5568',
-            'url'         => 'https://www.federalregister.gov/api/v1/articles.rss?conditions%5Bterm%5D=anti-money+laundering',
+            'color'       => '#2d3748',
+            'url'         => 'https://www.fsb.org/feed/',
             'type'        => 'rss',
-            'description' => 'AML Regulations — Federal Register',
+            'description' => 'Financial Stability Board',
         ],
         [
             'name'        => 'UAE Central Bank',
@@ -190,7 +190,12 @@ class RegulatoryFetcher
 
         $items  = [];
         $isAtom = isset($feed->entry);
-        $nodes  = $isAtom ? $feed->entry : ($feed->channel->item ?? []);
+
+        // Detect RSS 1.0/RDF: items are direct children of root, not under channel
+        $isRdf  = !$isAtom && !isset($feed->channel) && isset($feed->item);
+        $nodes  = $isAtom
+            ? $feed->entry
+            : ($isRdf ? $feed->item : ($feed->channel->item ?? []));
 
         foreach ($nodes as $node) {
             if (count($items) >= 5) break;
@@ -200,6 +205,13 @@ class RegulatoryFetcher
                 $link    = (string)($node->link['href'] ?? $node->link ?? '');
                 $desc    = strip_tags((string)($node->summary ?? $node->content ?? ''));
                 $dateStr = (string)($node->updated ?? $node->published ?? '');
+            } elseif ($isRdf) {
+                // RSS 1.0 — use dc:date namespace for date
+                $dcNs    = $node->children('http://purl.org/dc/elements/1.1/');
+                $title   = (string)($node->title ?? '');
+                $link    = (string)($node->link ?? '');
+                $desc    = strip_tags((string)($node->description ?? ''));
+                $dateStr = (string)($dcNs->date ?? $node->pubDate ?? '');
             } else {
                 $title   = (string)($node->title ?? '');
                 $link    = (string)($node->link ?? '');
